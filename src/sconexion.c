@@ -3,6 +3,159 @@
 #ifdef TIMETESTD
 
 #endif
+
+#define DIGSIG 0x02
+#define GRPSIG 0x01
+
+
+struct _ciphAlg{
+	EVP_CIPHER_CTX* ctx;
+	unsigned char* key;
+	unsigned char* iv;
+};
+
+struct _digSigAlg{
+	EVP_PKEY* keyRSA;
+};
+
+struct _grpSigAlg{
+	groupsig_key_t *grpkey;
+	groupsig_key_t *memkey;	
+};
+
+struct  _keyExcAlg{
+	int cosas;
+};
+
+
+int _validCiphScheme(int scheme){
+
+	return IOK;
+}
+
+int _validSigScheme(int scheme){
+
+	return IOK;
+}
+
+int _validKeyExcScheme(int scheme){
+
+	return IOK;
+}
+
+int _digSigType(int scheme){
+
+ 	if (scheme){
+ 		return DIGSIG;
+ 	}
+ 	else{
+ 		return GRPSIG;
+	}
+ }
+
+
+Sconexion2_t *initSconexion2(int ciphScheme, int peerScheme, int localScheme, 
+	int keyExcScheme){
+
+	Sconexion2_t *scnx = NULL;
+
+
+	if( (_validCiphScheme(ciphScheme) != IOK) || 
+		(_validSigScheme(peerScheme) != IOK) || 
+		(_validSigScheme(localScheme) !=IOK) || 
+		(_validKeyExcScheme(keyExcScheme) !=IOK)){
+		fprintf(stderr, "ERR: initSconexion2-->Invalid Scheme\n");
+		goto ERROR_CASE;
+	}
+
+	
+	scnx = malloc(sizeof(Sconexion2_t));
+	if(scnx == NULL){
+		fprintf(stderr, "ERR: initSconexion2-->Out of memory\n");
+		goto ERROR_CASE;
+	}
+	scnx->ciph = NULL;
+	scnx->peerAuth.digSig = NULL;
+	scnx->localAuth.digSig = NULL;
+	scnx->keyExc = NULL;
+
+
+	scnx->ciphScheme = ciphScheme;
+	scnx->peerAuthScheme = peerScheme;
+	scnx->localAuthScheme = localScheme;
+	scnx->keyExcScheme = keyExcScheme;
+	
+	scnx->ciph = malloc(sizeof(ciphAlg));
+	if(scnx->ciph == NULL){
+		fprintf(stderr, "ERR: initSconexion2-->Out of memory\n");
+		goto ERROR_CASE;
+
+	}
+
+	if(_digSigType(peerScheme) == DIGSIG){
+
+		scnx->peerAuth.digSig = malloc(sizeof(digSigAlg));
+		if(scnx->peerAuth.digSig == NULL){
+			fprintf(stderr, "ERR: initSconexion2-->Out of memory\n");
+			goto ERROR_CASE;
+
+		}
+
+
+		scnx->peerAuth.grpSig = malloc(sizeof(grpSigAlg));
+		if(scnx->peerAuth.grpSig == NULL){
+			fprintf(stderr, "ERR: initSconexion2-->Out of memory\n");
+			goto ERROR_CASE;
+
+		}
+	}
+
+	if(_digSigType(localScheme) == DIGSIG){
+
+		scnx->localAuth.digSig = malloc(sizeof(digSigAlg));
+		if(scnx->localAuth.digSig == NULL){
+			fprintf(stderr, "ERR: initSconexion2-->Out of memory\n");
+			goto ERROR_CASE;
+
+		}
+
+
+		scnx->localAuth.grpSig = malloc(sizeof(grpSigAlg));
+		if(scnx->localAuth.grpSig == NULL){
+			fprintf(stderr, "ERR: initSconexion2-->Out of memory\n");
+			goto ERROR_CASE;
+
+		}
+	}
+
+	return  scnx;
+
+	ERROR_CASE:
+
+	if(scnx->ciph){
+		free(scnx->ciph);
+		scnx->ciph = NULL;
+	}
+	if(scnx->peerAuth.digSig){
+		free(scnx->peerAuth.digSig);
+		scnx->peerAuth.digSig = NULL;
+	}
+	if(scnx->peerAuth.digSig){
+		free(scnx->localAuth.digSig);
+		scnx->localAuth.digSig = NULL;
+	}
+	if(scnx->peerAuth.digSig){
+		free(scnx->keyExc);
+		scnx->keyExc = NULL;}
+	if(scnx->peerAuth.digSig){
+		free(scnx);
+	}
+
+	return NULL;
+}
+
+
+
 Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey,
 		groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA){
 	Sconexion_t* scnx;

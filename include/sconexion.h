@@ -20,6 +20,37 @@ typedef struct SCONEXION
 	int siglen;
 }Sconexion_t;
 
+typedef struct _ciphAlg ciphAlg;
+
+typedef struct _digSigAlg digSigAlg;
+
+typedef struct _grpSigAlg grpSigAlg;
+
+typedef struct _keyExcAlg keyExcAlg;
+
+
+
+typedef struct SCONEXION2
+{	
+	int ciphScheme;
+	ciphAlg *ciph;
+
+	int peerAuthScheme;
+	union{
+		digSigAlg *digSig;
+		grpSigAlg *grpSig; 
+	} peerAuth;
+
+	int localAuthScheme;
+	union{
+		digSigAlg *digSig;
+		grpSigAlg *grpSig; 
+	} localAuth;
+
+	int keyExcScheme;
+	keyExcAlg *keyExc;
+}Sconexion2_t;
+
 Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey, 
 	groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA);
 
