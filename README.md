@@ -1,2 +1,3 @@
-# chatlibgroupsig
-A simple network chat using a group signature protocol for the comunications
+
+Secure comunication protocol that uses group signatres as identification mechanism
+
