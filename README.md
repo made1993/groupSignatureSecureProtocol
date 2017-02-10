@@ -1,3 +1,2 @@
-# groupSignatureSecureProtocol
-
-A secure implmentation of a comunication protocol for group signatures
+# chatlibgroupsig
+A simple network chat using a group signature protocol for the comunications
